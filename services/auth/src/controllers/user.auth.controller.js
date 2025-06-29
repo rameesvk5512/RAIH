@@ -1,5 +1,6 @@
 
 import UserAuthRepo from "../repositories/user.auth.repositories.js"
+import { publishToEmailQueue } from "../utils/rabbitMq.js";
 const UserAuthController = {
     registerUser: async (req, res) => {
     try {
@@ -7,9 +8,18 @@ const UserAuthController = {
       
       const data = await UserAuthRepo.register(req.body);
 
+      console.log("senddding to rabil mq");
+      const email =req.body.email
+  await publishToEmailQueue({
+  to: email,
+  subject: "Welcome to RAIH!",
+  template: "welcome", 
+  //context: { name }, 
+});
+
       return res.status(200).json({
         success: true,
-        message: 'registration completed succefully',
+        message: 'registration completed successfully',
         data,
       });
     } catch (err) {
